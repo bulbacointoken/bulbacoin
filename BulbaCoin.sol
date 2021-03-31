@@ -1,6 +1,6 @@
 /**
-5% of each transaction is burned.
-Tranasaction limited to 1 000 000 000 BulbaCoin
+5% of each transaction is burned. (except PreSale and 10 minutes after)
+Tranasaction limited to 1 000 000 000 BulbaCoin (except PreSale and 10 minutes after)
 */
 
 pragma solidity ^0.5.0;
