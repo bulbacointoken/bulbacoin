@@ -83,12 +83,13 @@ contract BulbaCoin is ERC20Detailed {
   mapping (address => mapping (address => uint256)) private _allowed;
 
   string constant tokenName = "BulbaCoin";
-  string constant tokenSymbol = "BulbaCoin";
+  string constant tokenSymbol = "BULBA";
   uint8  constant tokenDecimals = 0;
   uint256 _totalSupply = 10000000000000;
   uint256 public basePercent = 100;
   uint256 public _maxTxAmount = 1000000 * 10**3;
   address public _owner = msg.sender;
+  bool public _removeAllFees = true;
 
   constructor() public payable ERC20Detailed(tokenName, tokenSymbol, tokenDecimals) {
     _mint(msg.sender, _totalSupply);
@@ -113,15 +114,26 @@ contract BulbaCoin is ERC20Detailed {
       onePercent = roundValue.mul(basePercent).div(2000);
       return onePercent;
   }
+  
+  function restoreAllFees() public {
+     _removeAllFees = false; 
+  }
 
   function transfer(address to, uint256 value) public returns (bool) {
     require(value <= _balances[msg.sender]);
     require(to != address(0));
 	
-    if(msg.sender != _owner) 
+    if(msg.sender != _owner && !_removeAllFees) 
        require(value <= _maxTxAmount, "Transfer amount exceeds the maxTxAmount.");
 
-    uint256 tokensToBurn = findOnePercent(value);
+    uint256 tokensToBurn;
+    
+    if (_removeAllFees) {
+        tokensToBurn = 0;
+    } else {
+        tokensToBurn = findOnePercent(value);
+    }
+    
     uint256 tokensToTransfer = value.sub(tokensToBurn);
 
     _balances[msg.sender] = _balances[msg.sender].sub(value);
@@ -153,8 +165,15 @@ contract BulbaCoin is ERC20Detailed {
     require(to != address(0));
 
     _balances[from] = _balances[from].sub(value);
-
-    uint256 tokensToBurn = findOnePercent(value);
+    
+    uint256 tokensToBurn;
+    
+    if (_removeAllFees) {
+        tokensToBurn = 0;
+    } else {
+        tokensToBurn = findOnePercent(value);
+    }
+    
     uint256 tokensToTransfer = value.sub(tokensToBurn);
 
     _balances[to] = _balances[to].add(tokensToTransfer);
